@@ -1,0 +1,25 @@
+---
+language: python
+
+before_install:
+  - scripts/travis.sh
+
+env:
+  global:
+    - REPOSITORY=osism/ara-web
+  matrix:
+    - VERSION=latest
+    - VERSION=1.0.0
+
+script:
+  - bash scripts/build.sh
+
+after_success:
+  - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then bash scripts/push.sh; fi'
+
+notifications:
+  irc:
+    channels:
+      - "irc.freenode.org#osism"
+    template:
+      - "%{result} %{repository_slug}: %{commit_subject} %{build_url}"
