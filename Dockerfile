@@ -20,7 +20,8 @@ WORKDIR /home/ara-web/ara-web
 RUN if [ $VERSION != "latest" ]; then git checkout tags/$VERSION; fi \
     && npm install --only=production \
     && npm audit fix \
-    && npm run build
+    && npm run build \
+    && npm cache clean --force
 
 EXPOSE 3000
 
