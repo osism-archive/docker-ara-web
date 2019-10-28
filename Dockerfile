@@ -1,14 +1,15 @@
-FROM node:10
+FROM node:13-alpine
 LABEL maintainer="Betacloud Solutions GmbH (https://www.betacloud-solutions.de)"
 
 ARG VERSION
 ENV VERSION ${VERSION:-latest}
 
-ENV DEBIAN_FRONTEND noninteractive
-
 COPY files/run.sh /run.sh
 
-RUN useradd -m ara-web \
+RUN apk add --no-cache \
+      curl \
+      git \
+    && adduser -D ara-web \
     && npm install --only=production -g serve
 
 USER ara-web
@@ -26,4 +27,4 @@ RUN if [ $VERSION != "latest" ]; then git checkout tags/$VERSION; fi \
 EXPOSE 3000
 
 CMD ["/run.sh"]
-HEALTHCHECK CMD curl --fail http://localhost:3000/ || exit 1
+HEALTHCHECK CMD curl --silent --fail http://localhost:3000 || exit 1
