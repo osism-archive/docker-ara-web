@@ -9,7 +9,7 @@ ENV DEBIAN_FRONTEND noninteractive
 COPY files/run.sh /run.sh
 
 RUN useradd -m ara-web \
-    && npm install -g serve
+    && npm install --only=production -g serve
 
 USER ara-web
 
@@ -18,7 +18,7 @@ RUN git clone https://github.com/ansible-community/ara-web
 
 WORKDIR /home/ara-web/ara-web
 RUN if [ $VERSION != "latest" ]; then git checkout tags/$VERSION; fi \
-    && npm install \
+    && npm install --only=production \
     && npm audit fix \
     && npm run build
 
