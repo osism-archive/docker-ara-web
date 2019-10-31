@@ -1,29 +1,27 @@
-FROM node:13-alpine
+FROM node:13-alpine AS build
+
+ARG VERSION="latest"
+ARG ARA_WEB_REPO_URL="https://opendev.org/recordsansible/ara-web"
+
+WORKDIR /app
+RUN apk add --no-cache git
+RUN git clone $ARA_WEB_REPO_URL /app
+RUN if [ $VERSION != "latest" ]; then git checkout tags/$VERSION; fi
+
+RUN npm install --only=production
+RUN npm audit fix
+RUN npm run build
+
+FROM nginx:1.17-alpine
 LABEL maintainer="Betacloud Solutions GmbH (https://www.betacloud-solutions.de)"
 
-ARG VERSION
+ENV ARA_HOST="ara-server"
+ENV ARA_PORT="8000"
 
+WORKDIR /usr/share/nginx/html
+COPY --from=build /app/build /usr/share/nginx/html
+COPY files/nginx.conf /etc/nginx/conf.d/default.conf
 COPY files/run.sh /run.sh
 
-RUN apk add --no-cache \
-      curl \
-      git \
-    && adduser -D ara-web \
-    && npm install --only=production -g serve
-
-USER ara-web
-
-WORKDIR /home/ara-web
-RUN git clone https://github.com/ansible-community/ara-web
-
-WORKDIR /home/ara-web/ara-web
-RUN if [ $VERSION != "latest" ]; then git checkout tags/$VERSION; fi \
-    && npm install --only=production \
-    && npm audit fix \
-    && npm run build \
-    && npm cache clean --force
-
-EXPOSE 3000
-
 CMD ["/run.sh"]
-HEALTHCHECK CMD curl --silent --fail http://localhost:3000 || exit 1
+HEALTHCHECK CMD wget --quiet --tries=1 --spider http://localhost:80 || exit 1
