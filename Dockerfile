@@ -9,6 +9,7 @@ RUN git clone $ARA_WEB_REPO_URL /app
 RUN if [ $VERSION != "latest" ]; then git checkout tags/$VERSION; fi
 
 RUN npm install --only=production
+RUN npm update
 RUN npm audit fix
 RUN npm run build
 
