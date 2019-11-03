@@ -1,0 +1,5 @@
+---
+docker_image_name: ara-web
+versions:
+  - latest
+  - 1.0.0
